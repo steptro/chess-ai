@@ -38,7 +38,7 @@ const rookValueWhite = [
     [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
     [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
     [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
-    [  0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0],
+    [  0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0]
 ];
 
 const queenValue = [
@@ -85,8 +85,6 @@ export default {
             const value = this.minimax(depth - 1, game, -10000, 10000, !isMaximisingPlayer);
             game.undo();
 
-            console.log('Move: ' + move + ', value: ' + value);
-
             if (value >= bestMove) {
                 bestMove = value;
                 bestMoveFound = move;
@@ -97,7 +95,8 @@ export default {
     
     minimax(depth, game, alpha, beta, isMaximisingPlayer) {
         if (depth === 0) {
-            return -this.evaluateBoard(game.board());
+            const value = this.evaluateBoard(game.board());
+            return isMaximisingPlayer ? -1 * value : value;
         }
 
         const moves = game.moves();
@@ -154,16 +153,16 @@ export default {
                 value = 30 + knightValue[y][x];
                 break;
             case 'b':
-                value = 30 + isWhite ? bishopValueWhite[y][x] : bishopValueBlack[y][x];
+                value = 30 + (isWhite ? bishopValueWhite[y][x] : bishopValueBlack[y][x]);
                 break;
             case 'r':
-                value = 50 + isWhite ? rookValueWhite[y][x] : rookValueBlack[y][x];
+                value = 50 + (isWhite ? rookValueWhite[y][x] : rookValueBlack[y][x]);
                 break;
             case 'q':
                 value = 90 + queenValue[y][x];
                 break;
             case 'k':
-                value = 900 + isWhite ? kingValueWhite[y][x] : kingValueBlack[y][x];
+                value = 900 + (isWhite ? kingValueWhite[y][x] : kingValueBlack[y][x]);
                 break;
             default:
                 throw 'Unknown piece: ' + piece.type;
