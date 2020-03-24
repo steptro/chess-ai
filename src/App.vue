@@ -1,16 +1,48 @@
 <template>
     <div class="container">
         <div id="app">
-            <chessboard ref="board" :fen="fen" @moved="moved" />
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title">Settings</h1>
 
-            <div class="controls">
-                <div class="buttons is-centered">
-                    <b-button :loading="generatingMove" @click="doBestMove">Do best move</b-button>
-                    <b-button @click="makeRandomMove">Do random move</b-button>
+                    <b-field label="Depth" horizontal>
+                        <b-select placeholder="Depth" v-model="depth" expanded>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </b-select>
+                    </b-field>
+                    
+                    <div class="controls">
+                        <div class="buttons is-centered">
+                            <b-button class="is-fullwidth" :loading="generatingMove" @click="doBestMove">Do best move</b-button>
+                            <b-button class="is-fullwidth" @click="makeRandomMove">Do random move</b-button>
+                            <b-button class="is-fullwidth" @click="evaluateBoard">Evaluate board</b-button>
+                        </div>
+                    </div>
+
+                    <br>
+                    
+                    <table class="table is-bordered is-fullwidth">
+                        <tbody>
+                            <tr>
+                                <td>Best move</td>
+                                <td>{{ this.bestMove}}</td>
+                            </tr>
+                            <tr>
+                                <td>Board value</td>
+                                <td>{{ this.boardValue }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                </div>
+                <div class="column">
+                    <chessboard ref="board" :fen="fen" @moved="moved" />
                 </div>
             </div>
-            
-            <span>Best move: {{ this.bestMove }}</span>
         </div>
     </div>
 </template>
@@ -23,16 +55,23 @@
         name: 'App',
         mounted() {
             window.addEventListener('keyup', this.keyup);
+            
+            // for (let i = 0; i < 100; i++) {
+            //     this.makeRandomMove();
+            // }
+            
+            this.game.load(this.fen);
         },
         data() {
             return {
                 game: new Chess(),
                 board: null,
-                fen: '',
+                fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
                 depth: 3,
                 positions: 0,
                 bestMove: '',
                 generatingMove: false,
+                boardValue: 0,
             }
         },
         methods: {
@@ -81,6 +120,9 @@
                 this.game.move(possibleMoves[randomIdx]);
                 this.fen = this.game.fen();
             },
+            evaluateBoard() {
+                this.boardValue = chessAI.evaluateBoard(this.game.board());
+            }
         }
     }
 </script>
@@ -90,12 +132,11 @@
         font-family: Avenir, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        text-align: center;
         color: #2c3e50;
         margin-top: 60px;
     }
     
-    .controls {
-        margin-top: 50px;
+    .field-label {
+        padding-top: .375em;
     }
 </style>
