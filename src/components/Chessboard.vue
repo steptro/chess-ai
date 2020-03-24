@@ -1,5 +1,5 @@
 <template>
-    <div class="blue merida">
+    <div class="">
         <div ref="board" class="cg-board-wrap"></div>
     </div>
 </template>

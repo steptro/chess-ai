@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import App from './App.vue';
-// import chessBoard2 from 'vue-chessboard';
 import chessBoard from './components/Chessboard';
 import Buefy from 'buefy';
 
@@ -11,8 +10,7 @@ import './assets/theme.css';
 Vue.config.productionTip = false;
 
 Vue.use(Buefy);
-// Vue.use(chessBoard2);
-Vue.component('chessboard2', chessBoard);
+Vue.component('chessboard', chessBoard);
 
 new Vue({
   render: h => h(App),

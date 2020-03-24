@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div id="app">
-            <chessboard2 ref="board" :fen="fen" @moved="moved" />
+            <chessboard ref="board" :fen="fen" @moved="moved" />
 
             <div class="controls">
                 <div class="buttons is-centered">
