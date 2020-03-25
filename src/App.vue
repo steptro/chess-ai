@@ -24,6 +24,10 @@
                     </div>
 
                     <br>
+
+                    <b-field label="Import fen">
+                        <b-input ref="importFen" @click.native="importFen" v-model="fen" expanded  />
+                    </b-field>
                     
                     <table class="table is-bordered is-fullwidth">
                         <tbody>
@@ -122,6 +126,10 @@
             },
             evaluateBoard() {
                 this.boardValue = chessAI.evaluateBoard(this.game.board());
+            },
+            importFen() {
+                console.log('import fen');
+                this.$refs.importFen.getElement().select();
             }
         }
     }
