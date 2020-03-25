@@ -41,6 +41,18 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <label class="label">History</label>
+                    <table class="table is-bordered is-striped is-narrow is-fullwidth">
+                        <tbody>
+                            <tr v-for="(move, index) in game.history()" :key="index">
+                                <td v-if="isEven(index)">{{ index + 1 }} White</td>
+                                <td v-else><b>{{ index + 1 }} Black</b></td>
+                                <td v-if="isEven(index)">{{ move }}</td>
+                                <td v-else><b>{{ move }}</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
                     
                 </div>
                 <div class="column">
@@ -130,6 +142,9 @@
             importFen() {
                 console.log('import fen');
                 this.$refs.importFen.getElement().select();
+            },
+            isEven(number) {
+                return !(number & 1);
             }
         }
     }
