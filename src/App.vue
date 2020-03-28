@@ -3,34 +3,32 @@
         <div id="app">
             <div class="columns">
                 <div class="column">
-                    <h1 class="title">Settings</h1>
-
-                    <b-field label="Depth" horizontal>
-                        <b-select placeholder="Depth" v-model="depth" expanded>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </b-select>
-                    </b-field>
-                    
+                    <label class="label">Actions</label>
                     <div class="controls">
                         <div class="buttons is-centered">
-                            <b-button class="is-fullwidth" :loading="generatingMove" @click="doBestMove">Do best move</b-button>
+                            <b-button class="is-fullwidth" :loading="calculatingBestMove" @click="doBestMove">Do best move</b-button>
                             <b-button class="is-fullwidth" @click="makeRandomMove">Do random move</b-button>
                             <b-button class="is-fullwidth" @click="evaluateBoard">Evaluate board</b-button>
+                            <b-button class="is-fullwidth" @click="resetBoard">Reset board</b-button>
                         </div>
                     </div>
 
                     <br>
 
-                    <b-field label="Import fen">
-                        <b-input ref="importFen" @click.native="importFen" v-model="fen" expanded  />
-                    </b-field>
-                    
-                    <table class="table is-bordered is-fullwidth">
+<!--                    <b-field label="FEN" label-position="on-border">-->
+<!--                        <b-input ref="importFen" @click.native="selectFen" v-model="fen" expanded  />-->
+<!--                        <p class="control">-->
+<!--                            <b-button class="is-primary" @click="importFen">Import</b-button>-->
+<!--                        </p>-->
+<!--                    </b-field>-->
+
+                    <label class="label">Stats</label>
+                    <table class="table is-bordered is-striped is-fullwidth stats">
                         <tbody>
+                            <tr>
+                                <td>Time</td>
+                                <td>{{ this.format(this.duration / 1000) }} s</td>
+                            </tr>
                             <tr>
                                 <td>Best move</td>
                                 <td>{{ this.bestMove}}</td>
@@ -39,13 +37,21 @@
                                 <td>Board value</td>
                                 <td>{{ this.boardValue }}</td>
                             </tr>
+                        
                         </tbody>
                     </table>
 
+                    <label class="label">Settings</label>
+                    <b-field label="Depth" horizontal>
+                        <b-select placeholder="Depth" v-model="depth" expanded>
+                            <option v-for="i in 20" :key="i" :value="i">{{ i }}</option>
+                        </b-select>
+                    </b-field>
+                    
                     <label class="label">History</label>
-                    <table class="table is-bordered is-striped is-narrow is-fullwidth">
+                    <table class="table is-striped is-narrow is-fullwidth history is-centered">
                         <tbody>
-                            <tr v-for="(move, index) in game.history()" :key="index">
+                            <tr v-for="(move, index) in game.history()" :key="index" >
                                 <td v-if="isEven(index)">{{ index + 1 }} White</td>
                                 <td v-else><b>{{ index + 1 }} Black</b></td>
                                 <td v-if="isEven(index)">{{ move }}</td>
@@ -66,15 +72,12 @@
 <script>
     import Chess from 'chess.js';
     import chessAI from './assets/chess-ai';
+    import numeral from 'numeral';
 
     export default {
         name: 'App',
         mounted() {
             window.addEventListener('keyup', this.keyup);
-            
-            // for (let i = 0; i < 100; i++) {
-            //     this.makeRandomMove();
-            // }
             
             this.game.load(this.fen);
         },
@@ -86,15 +89,15 @@
                 depth: 3,
                 positions: 0,
                 bestMove: '',
-                generatingMove: false,
+                calculatingBestMove: false,
                 boardValue: 0,
+                duration: 0,
             }
         },
         methods: {
             keyup(event) {
                 if (event.keyCode === 37) {
                     this.game.undo();
-                    this.fen = this.game.fen();
                 }
                 
                 if (event.keyCode === 39) {
@@ -102,7 +105,6 @@
                 }
             },
             moved({orig, dest}) {
-                console.log('moved', orig, dest);
                 this.game.move({from: orig, to: dest, promotion: 'q'});
                 this.fen = this.game.fen();
             },
@@ -111,7 +113,8 @@
                     return;
                 }
                 
-                this.generatingMove = true;
+                this.calculatingBestMove = true;
+                const start = performance.now();
                 
                 setTimeout(() => {
                     const isMaximisingPlayer = this.game.turn() === 'w';
@@ -119,11 +122,22 @@
                         .then(bestMove => {
                             this.bestMove = bestMove;
                             this.game.move(this.bestMove);
-                            this.fen = this.game.fen();
+                            
+                            const history = this.game.history({ verbose: true });
+                            const last = history[history.length - 1];
+                            this.$refs.board.board.move(last.from, last.to);
 
-                            this.generatingMove = false;
+                            this.calculatingBestMove = false;
+                            const end = performance.now();
+                            this.duration = end - start;
+
+                            setTimeout(() => {
+                                this.fen = this.game.fen();
+                            }, 500);
+                            
+                            this.evaluateBoard();
                         });
-                }, 100)
+                }, 0);
             },
             makeRandomMove() {
                 const possibleMoves = this.game.moves();
@@ -134,17 +148,32 @@
 
                 const randomIdx = Math.floor(Math.random() * possibleMoves.length);
                 this.game.move(possibleMoves[randomIdx]);
-                this.fen = this.game.fen();
+
+                const history = this.game.history({ verbose: true });
+                const last = history[history.length - 1];
+                this.$refs.board.board.move(last.from, last.to);
+                
+                setTimeout(() => {
+                    this.fen = this.game.fen();
+                }, 500);
+
+                this.evaluateBoard();
             },
             evaluateBoard() {
                 this.boardValue = chessAI.evaluateBoard(this.game.board());
             },
-            importFen() {
-                console.log('import fen');
+            resetBoard() {
+                this.game = new Chess();
+                this.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+            },
+            selectFen() {
                 this.$refs.importFen.getElement().select();
             },
             isEven(number) {
                 return !(number & 1);
+            },
+            format(number) {
+                return numeral(number).format('0.000');
             }
         }
     }
@@ -161,5 +190,9 @@
     
     .field-label {
         padding-top: .375em;
+    }
+    
+    .stats td, .history td {
+        width: 50%;
     }
 </style>

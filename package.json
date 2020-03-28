@@ -12,6 +12,7 @@
     "chess.js": "^0.10.3",
     "chessground": "latest",
     "core-js": "^3.6.4",
+    "numeral": "^2.0.6",
     "vue": "^2.6.11",
     "vue-chessboard": "^0.6.5"
   },
