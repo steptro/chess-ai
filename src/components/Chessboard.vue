@@ -174,6 +174,10 @@
                         free: this.free,
                         dests: this.possibleMoves(),
                     },
+                    animation: {
+                        enabled: true,
+                        duration: 500,
+                    },
                     orientation: this.orientation,
                 })
                 this.board.set({
