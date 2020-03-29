@@ -150,10 +150,10 @@ export default {
                 value = 10 + (isWhite ? pawnValueWhite[y][x] : pawnValueBlack[y][x]);
                 break;
             case 'n':
-                value = 30 + knightValue[y][x];
+                value = 32 + knightValue[y][x];
                 break;
             case 'b':
-                value = 30 + (isWhite ? bishopValueWhite[y][x] : bishopValueBlack[y][x]);
+                value = 33 + (isWhite ? bishopValueWhite[y][x] : bishopValueBlack[y][x]);
                 break;
             case 'r':
                 value = 50 + (isWhite ? rookValueWhite[y][x] : rookValueBlack[y][x]);
@@ -162,7 +162,7 @@ export default {
                 value = 90 + queenValue[y][x];
                 break;
             case 'k':
-                value = 900 + (isWhite ? kingValueWhite[y][x] : kingValueBlack[y][x]);
+                value = 2000 + (isWhite ? kingValueWhite[y][x] : kingValueBlack[y][x]);
                 break;
             default:
                 throw 'Unknown piece: ' + piece.type;
